@@ -12,104 +12,26 @@ dropdownDefault.style.display = 'none';
 dropdownSelect.style.display = 'none';
 dropdownAutocomplete.style.display = 'none';
 
-const data = [
-    {
-        "country": "Россия",
-        "count": "144500000",
-        "cities": [
-            {
-                "name": "Рязань",
-                "count": "538962",
-                "link": "https://ru.wikipedia.org/wiki/%D0%A0%D1%8F%D0%B7%D0%B0%D0%BD%D1%8C"
-            },
-            {
-                "name": "Москва",
-                "count": "12615882",
-                "link": "https://ru.wikipedia.org/wiki/%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0"
-            },
-            {
-                "name": "Санкт-Петербург",
-                "count": "5383968",
-                "link": "https://ru.wikipedia.org/wiki/%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3"
-            },
-            {
-                "name": "Краснодар",
-                "count": "918145",
-                "link": "https://ru.wikipedia.org/wiki/%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B4%D0%B0%D1%80"
-            },
-            {
-                "name": "Екатеринбург",
-                "count": "1484456",
-                "link": "https://ru.wikipedia.org/wiki/%D0%95%D0%BA%D0%B0%D1%82%D0%B5%D1%80%D0%B8%D0%BD%D0%B1%D1%83%D1%80%D0%B3"
-            },
-            {
-                "name": "Ростов-на-Дону",
-                "count": "1130305",
-                "link": "https://ru.wikipedia.org/wiki/%D0%A0%D0%BE%D1%81%D1%82%D0%BE%D0%B2-%D0%BD%D0%B0-%D0%94%D0%BE%D0%BD%D1%83"
-            },
-            {
-                "name": "Воронеж",
-                "count": "1054537",
-                "link": "https://ru.wikipedia.org/wiki/%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6"
-            }
-        ]
+let data = [],
+    id = '';
 
-    },
-    {
-        "country": "Германия",
-        "count": 82175684 ,
-        "cities": [
-            {
-                "name": "Берлин",
-                "count": "3613495",
-                "link": "https://ru.wikipedia.org/wiki/%D0%91%D0%B5%D1%80%D0%BB%D0%B8%D0%BD"
-            },
-            {
-                "name": "Мюнхен",
-                "count": "1456039",
-                "link": "https://ru.wikipedia.org/wiki/%D0%9C%D1%8E%D0%BD%D1%85%D0%B5%D0%BD"
-            },
-            {
-                "name": "Франкфурт-на-Майне",
-                "count": "736414",
-                "link": "https://ru.wikipedia.org/wiki/%D0%A4%D1%80%D0%B0%D0%BD%D0%BA%D1%84%D1%83%D1%80%D1%82-%D0%BD%D0%B0-%D0%9C%D0%B0%D0%B9%D0%BD%D0%B5"
-            },
-            {
-                "name": "Кёльн",
-                "count": "1080394",
-                "link": "https://ru.wikipedia.org/wiki/%D0%9A%D1%91%D0%BB%D1%8C%D0%BD"
-            }
-        ]
-    },
-    {
-        "country": "Англия",
-        "count": 53012456,
-        "cities": [
-            {
-                "name": "Лондон",
-                "count": " 8869898",
-                "link": "https://ru.wikipedia.org/wiki/%D0%9B%D0%BE%D0%BD%D0%B4%D0%BE%D0%BD"
-            },
-            {
-                "name": "Манчестер",
-                "count": "545500",
-                "link": "https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D0%BD%D1%87%D0%B5%D1%81%D1%82%D0%B5%D1%80"
-            },
-            {
-                "name": "Эдинбург",
-                "count": "488100",
-                "link": "https://ru.wikipedia.org/wiki/%D0%AD%D0%B4%D0%B8%D0%BD%D0%B1%D1%83%D1%80%D0%B3"
-            },
-            {
-                "name": "Бристоль",
-                "count": "567111",
-                "link": "https://ru.wikipedia.org/wiki/%D0%91%D1%80%D0%B8%D1%81%D1%82%D0%BE%D0%BB%D1%8C"
-            }
-        ]
+const getData = (url) => {
 
-    }
-]
+    const loader = document.querySelector('.loader');
+    loader.style.display = 'block';
 
+    setTimeout(() => {
+        fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            data = result.RU;
+            loader.style.display = 'none';
+        })
+        .catch(err => {
+            throw new Error(err);
+        });
+    }, 1000)
+};
 
 const generateContent = (data, selector, step) => {
     const dropdownCol = document.querySelector(selector);
@@ -119,11 +41,20 @@ const generateContent = (data, selector, step) => {
         countryBlock.classList.add('dropdown-lists__countryBlock');
         countryBlock.dataset.country = item.country;
 
-        let content = '';
+        let content = '',
+            word = '';
         if(item.country){
             content = `
             <div class="dropdown-lists__total-line">
-                <div class="dropdown-lists__country">${item.country}</div>
+                <div class="dropdown-lists__country">${
+                    item.country.split('').forEach((key, i) => {
+                        if(i < item.nameLength){
+                            word += `<span style='background-color:red'>${key}</span>`;
+                        } else {
+                            word += key;
+                        }
+                    }), word}
+                </div>
                 <div class="dropdown-lists__count">${item.count}</div>
             </div>
             `;
@@ -138,10 +69,18 @@ const generateContent = (data, selector, step) => {
                 </div>
                 `;
             });
-        } else {
+        } else if(item){
             content += `
             <div class="dropdown-lists__line" data-link=${item.link}>
-                <div class="dropdown-lists__city">${item.name}</div>
+                <div class="dropdown-lists__city">${
+                    item.name.split('').forEach((key, i) => {
+                        if(i < item.nameLength){
+                            word += `<span style='color: green'>${key}</span>`;
+                        } else {
+                            word += key;
+                        }
+                    }), word}
+                </div>
                 <div class="dropdown-lists__count">${item.count}</div>
             </div>
             `;
@@ -155,14 +94,25 @@ const generateContent = (data, selector, step) => {
 const filtered = () => {
 
     const search = (value) => {
-        const newData = [];
+        const newData = [],
+            valueLength = value.length;
         data.forEach(item => {
             if(!item.country.toLowerCase().indexOf(value.toLowerCase())){
-                newData.push(item);
+                newData.push({
+                    'country': item.country,
+                    'count': item.count,
+                    'cities': item.cities,
+                    'nameLength': valueLength
+                });
             }
             item.cities.forEach(city => {
                 if(!city.name.toLowerCase().indexOf(value.toLowerCase())){
-                    newData.push(city);
+                    newData.push({
+                        'name': city.name,
+                        'count': city.count,
+                        'link': city.link,
+                        'nameLength': valueLength
+                    });
                 }
             });
         });
@@ -242,23 +192,52 @@ dropdownLists.addEventListener('click', (e) => {
     const target = e.target,
         country = target.closest('.dropdown-lists__countryBlock').dataset.country;
 
+    let count = 0;
+
     if(target.closest('.dropdown-lists__line > .dropdown-lists__city')){
         button.href = target.dataset.link;
         putDataInput(target.textContent);
     }
+
     if(target.closest('.dropdown-lists__list--default > div > div > .dropdown-lists__total-line')){
-        dropdownDefault.style.display = 'none';
-        dropdownSelect.style.display = 'block';
+        const animate = () => {
+            count += 5;
+            dropdownDefault.style.transform = `translateX(${count}%)`;
+            if(count < 100){
+                requestAnimationFrame(animate)
+            } else if( count === 100){
+                dropdownDefault.style.display = 'none';
+                dropdownSelect.style.display = 'block';
+                dropdownDefault.style.transform = `translateX(0)`;
+            }
+        };
+
+        requestAnimationFrame(animate);
+
         generateContent(filtered().country(country), '.dropdown-lists__list--select > .dropdown-lists__col');
 
         putDataInput(country);
     }
-    if(target.closest('.dropdown-lists__list--select > div > div > div.dropdown-lists__total-line')){
-        dropdownSelect.style.display = 'none';
-        dropdownDefault.style.display = 'block';
 
+    if(target.closest('.dropdown-lists__list--select > div > div > div.dropdown-lists__total-line')){
+        const animate = () => {
+            count -= 5;
+            dropdownSelect.style.transform = `translateX(${count}%)`;
+            if(count > -100){
+                requestAnimationFrame(animate)
+            }
+            if(count === -100){
+                dropdownSelect.style.display = 'none';
+                dropdownDefault.style.display = 'block';
+                target.closest('.dropdown-lists__col').innerHTML = '';
+                dropdownSelect.style.transform = `translateX(0)`;
+            }
+        };
+
+        requestAnimationFrame(animate);
         selectCities.value = '';
-        target.closest('.dropdown-lists__col').innerHTML = '';
+        btnClose.style.display = 'none';
+
     }
 });
 
@@ -271,3 +250,6 @@ btnClose.addEventListener('click', () => {
     btnClose.style.display = 'none';
 });
 button.addEventListener('click', () => selectCities.value = '');
+
+getData('./db_cities.json');
+
