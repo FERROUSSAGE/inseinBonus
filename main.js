@@ -6,25 +6,40 @@ const selectCities = document.getElementById('select-cities'),
     dropdownAutocomplete = document.querySelector('.dropdown-lists__list--autocomplete'),
     dropdownLists = document.querySelector('.dropdown-lists'),
     button = document.querySelector('.button'),
-    btnClose = document.querySelector('.close-button');
+    btnClose = document.querySelector('.close-button'),
+    cookie = document.cookie.split('; ')[0].split('=');
 
 dropdownDefault.style.display = 'none';
 dropdownSelect.style.display = 'none';
 dropdownAutocomplete.style.display = 'none';
 
-let data = [],
-    id = '';
+let data = '';
 
-const getData = (url) => {
+const setCookie = (cname, cvalue, exdays = 1) => {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+};
 
-    const loader = document.querySelector('.loader');
+const getData = () => {
+    data = JSON.parse(localStorage.getItem('data'));
+    filtered().sortCountry();
+};
+
+const getDataFromServer = (url) => {
+
+    const local = cookie[1] ? cookie[1] : prompt('Введите локаль: '),
+        loader = document.querySelector('.loader');
+
+    setCookie('local', local); 
+
     loader.style.display = 'block';
-
     setTimeout(() => {
         fetch(url)
         .then(response => response.json())
         .then(result => {
-            data = result.RU;
+            localStorage.setItem('data', JSON.stringify(result[local]));
             loader.style.display = 'none';
         })
         .catch(err => {
@@ -93,6 +108,16 @@ const generateContent = (data, selector, step) => {
 
 const filtered = () => {
 
+    const sortCountryArray = () => {
+        const local = cookie[1],
+            newData = [];
+        local === 'RU' ? newData.push(data[0], data[1], data[2]) :
+        local === 'EN' ? newData.push(data[2], data[1], data[0]) :
+        local === 'DE' ? newData.push(data[1], data[2], data[0]) : '';
+
+        data = newData;
+    };
+
     const search = (value) => {
         const newData = [],
             valueLength = value.length;
@@ -147,7 +172,8 @@ const filtered = () => {
     return {
         count: sortCount,
         country: sortCountry,
-        search: search
+        search: search,
+        sortCountry: sortCountryArray
     };
 };
 
@@ -159,6 +185,7 @@ const putDataInput = (value) => {
 };
 
 selectCities.addEventListener('click', (e) => {
+    getData();
     document.querySelector('.dropdown-lists__col').innerHTML = '';
 
     dropdownDefault.style.display = 'block';
@@ -251,5 +278,5 @@ btnClose.addEventListener('click', () => {
 });
 button.addEventListener('click', () => selectCities.value = '');
 
-getData('./db_cities.json');
+getDataFromServer('./db_cities.json');
 
