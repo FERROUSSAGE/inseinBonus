@@ -284,7 +284,7 @@ btnClose.addEventListener('click', () => {
 });
 button.addEventListener('click', () => selectCities.value = '');
 
-if(!localStorage.getItem('data')){
+if(!localStorage.getItem('data')|| !cookie[1]){
     getDataFromServer('./db_cities.json');
 }
 getData();
