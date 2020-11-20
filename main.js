@@ -25,6 +25,11 @@ const setCookie = (cname, cvalue, exdays = 1) => {
 const getData = () => {
     data = JSON.parse(localStorage.getItem('data'));
     filtered().sortCountry();
+
+    if(localStorage.getItem('reload') === 'true'){
+        localStorage.setItem('reload', false);
+        location.href = location.href;
+    }
 };
 
 const getDataFromServer = (url) => {
@@ -40,8 +45,10 @@ const getDataFromServer = (url) => {
         .then(response => response.json())
         .then(result => {
             localStorage.setItem('data', JSON.stringify(result[local]));
+            localStorage.setItem('reload', true);
             loader.style.display = 'none';
         })
+        .then(() => getData())
         .catch(err => {
             throw new Error(err);
         });
@@ -185,7 +192,6 @@ const putDataInput = (value) => {
 };
 
 selectCities.addEventListener('click', (e) => {
-    getData();
     document.querySelector('.dropdown-lists__col').innerHTML = '';
 
     dropdownDefault.style.display = 'block';
@@ -278,5 +284,8 @@ btnClose.addEventListener('click', () => {
 });
 button.addEventListener('click', () => selectCities.value = '');
 
-getDataFromServer('./db_cities.json');
+if(!localStorage.getItem('data')){
+    getDataFromServer('./db_cities.json');
+}
+getData();
 
