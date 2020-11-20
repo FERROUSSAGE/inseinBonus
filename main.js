@@ -25,11 +25,6 @@ const setCookie = (cname, cvalue, exdays = 1) => {
 const getData = () => {
     data = JSON.parse(localStorage.getItem('data'));
     filtered().sortCountry();
-
-    if(localStorage.getItem('reload') === 'true'){
-        localStorage.setItem('reload', false);
-        location.href = location.href;
-    }
 };
 
 const getDataFromServer = (url) => {
@@ -45,14 +40,25 @@ const getDataFromServer = (url) => {
         .then(response => response.json())
         .then(result => {
             localStorage.setItem('data', JSON.stringify(result[local]));
-            localStorage.setItem('reload', true);
             loader.style.display = 'none';
         })
-        .then(() => getData())
+        .then(() => {
+            getData();
+            location.href = location.href;
+        })
         .catch(err => {
             throw new Error(err);
         });
     }, 1000)
+};
+
+const paintLetter = (word, property) => {
+    let letter = '';
+    word.split('').forEach((key, i) => {
+        i < property ? letter += `<span style='color:green'>${key}</span>` : letter += key;
+    });
+
+    return letter;
 };
 
 const generateContent = (data, selector, step) => {
@@ -68,15 +74,7 @@ const generateContent = (data, selector, step) => {
         if(item.country){
             content = `
             <div class="dropdown-lists__total-line">
-                <div class="dropdown-lists__country">${
-                    item.country.split('').forEach((key, i) => {
-                        if(i < item.nameLength){
-                            word += `<span style='background-color:red'>${key}</span>`;
-                        } else {
-                            word += key;
-                        }
-                    }), word}
-                </div>
+                <div class="dropdown-lists__country">${paintLetter(item.country, item.nameLength)}</div>
                 <div class="dropdown-lists__count">${item.count}</div>
             </div>
             `;
@@ -94,15 +92,7 @@ const generateContent = (data, selector, step) => {
         } else if(item){
             content += `
             <div class="dropdown-lists__line" data-link=${item.link}>
-                <div class="dropdown-lists__city">${
-                    item.name.split('').forEach((key, i) => {
-                        if(i < item.nameLength){
-                            word += `<span style='color: green'>${key}</span>`;
-                        } else {
-                            word += key;
-                        }
-                    }), word}
-                </div>
+                <div class="dropdown-lists__city">${paintLetter(item.name, item.nameLength)}</div>
                 <div class="dropdown-lists__count">${item.count}</div>
             </div>
             `;
